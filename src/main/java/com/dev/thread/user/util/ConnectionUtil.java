@@ -27,15 +27,4 @@ public class ConnectionUtil {
         }
         return conn;
     }
-
-//    public static MongoCollection<Document> getConnectionMongo() {
-//        String url = "mongodb+srv://root:1234@cluster0.pjzkv.mongodb.net/test";
-//        MongoClient mongoClient = new MongoClient(new MongoClientURI(url));
-//        MongoDatabase database = mongoClient.getDatabase("thread");
-//        MongoCollection<Document> collection = database.getCollection("test");
-//
-//        System.out.println("Подключение успешное");
-//
-//        return collection;
-//    }
 }

@@ -3,6 +3,8 @@ package com.dev.thread.user.controller;
 import com.dev.thread.user.worker.MainWorker;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+
 @RestController
 @RequestMapping("/main")
 public class MainController {
@@ -13,7 +15,7 @@ public class MainController {
     }
 
     @PostMapping("/{version}")
-    public void getRandom(@PathVariable String version) {
+    public void getRandom(@PathVariable String version) throws InterruptedException, SQLException {
         worker.testThread(version);
     }
 }

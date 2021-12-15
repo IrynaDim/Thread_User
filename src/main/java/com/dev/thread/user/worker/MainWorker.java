@@ -1,60 +1,51 @@
 package com.dev.thread.user.worker;
 
-import com.dev.thread.user.dao.mySql.UserDaoJdbcImpl;
+import com.dev.thread.user.dao.UserDaoJdbc;
+import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.dev.thread.user.service.UserService;
 
+import com.dev.thread.user.util.ThreadUser;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class MainWorker {
-    private final UserDaoJdbcImpl userDaoJdbc;
-    private final UserService userService;
+    private final UserDaoJdbc userDaoJdbc;
+    private final UserDaoMongo userDaoMongo;
+    private Map<String, User> map;
 
-    public MainWorker(UserDaoJdbcImpl userDaoJdbc,
-                      UserService userService) {
+
+    public MainWorker(UserDaoJdbc userDaoJdbc,
+                      UserDaoMongo userDaoMongo) {
         this.userDaoJdbc = userDaoJdbc;
-        this.userService = userService;
+        this.userDaoMongo = userDaoMongo;
     }
 
-    public void testThread(String version) {
-        addToMySql();
-        addToMongo();
+    public void testThread(String version) throws InterruptedException{
+        beforeThread();
+
+        ThreadUser dataFromFileReading = new ThreadUser(FileReader.readFromFile("input.txt"), map);
+        Thread t = new Thread(dataFromFileReading);
+        t.setName("Thread-One");
+        Thread t1 = new Thread(dataFromFileReading);
+        t1.setName("Thread-Two");
+
+        t.start();
+        t1.start();
+
+        t.join();
+        t1.join();
+
+        List<User> usersList = new ArrayList<>(map.values());
+
+        userDaoJdbc.saveAll(usersList);
+        userDaoMongo.saveAll(usersList);
     }
 
-    private void addToMySql() {
-        User user1 = new User();
-        user1.setName("Iryna");
-        user1.setSum(50.0);
-
-        User user2 = new User();
-        user2.setName("Oleg");
-        user2.setSum(100.0);
-
-        User user3 = new User();
-        user3.setName("Carla");
-        user3.setSum(20.0);
-
-        userDaoJdbc.create(user1);
-        userDaoJdbc.create(user2);
-        userDaoJdbc.create(user3);
-    }
-
-    private void addToMongo() {
-        User user1 = new User();
-        user1.setName("Iryna");
-        user1.setSum(50.0);
-
-        User user2 = new User();
-        user2.setName("Oleg");
-        user2.setSum(100.0);
-
-        User user3 = new User();
-        user3.setName("Carla");
-        user3.setSum(20.0);
-
-        userService.add(user1);
-        userService.add(user2);
-        userService.add(user3);
+    private void beforeThread() {
+        map = new HashMap<>();
+        userDaoJdbc.clearTable();
+        userDaoMongo.clearTable();
     }
 }
