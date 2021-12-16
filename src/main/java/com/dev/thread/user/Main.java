@@ -11,7 +11,3 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 }
-
-// TODO
-// add @Value
-// переход сразу на localhost8080

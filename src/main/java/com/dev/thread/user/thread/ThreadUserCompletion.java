@@ -2,32 +2,20 @@ package com.dev.thread.user.thread;
 
 import com.dev.thread.user.model.User;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.Callable;
 
 @Data
-public class ThreadUserSemaphore implements Runnable {
+public class ThreadUserCompletion implements Callable<Map<String, User>> {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
-    private boolean doStop = false;
-    private boolean done = false;
-
-    public synchronized void doStop() {
-        this.doStop = true;
-    }
-
-//    private synchronized boolean keepRunning() {
-//        return !this.doStop;
-//    }
-
 
     @Override
-    public void run() {
-        while (!dataFromFile.isEmpty() && !doStop) {
+    public Map<String, User> call() {
+        while (!dataFromFile.isEmpty()) {
 
             System.out.println(Thread.currentThread().getName());
 
@@ -50,6 +38,6 @@ public class ThreadUserSemaphore implements Runnable {
                 }
             }
         }
-        done = true;
+        return map;
     }
 }

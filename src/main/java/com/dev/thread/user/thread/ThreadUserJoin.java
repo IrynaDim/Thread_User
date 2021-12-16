@@ -1,7 +1,6 @@
 package com.dev.thread.user.thread;
 
 import com.dev.thread.user.model.User;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
