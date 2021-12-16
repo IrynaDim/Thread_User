@@ -1,22 +1,20 @@
 package com.dev.thread.user.thread;
 
 import com.dev.thread.user.model.User;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.Callable;
 
 @Data
-public class ThreadUserExecutor implements Callable<Map<String, User>> {
+public class ThreadUserExecutor implements Runnable {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
     private final String name;
 
     @Override
-    public Map<String, User> call() {
+    public void run() {
         while (!dataFromFile.isEmpty()) {
 
             System.out.println(Thread.currentThread().getName());
@@ -40,6 +38,6 @@ public class ThreadUserExecutor implements Callable<Map<String, User>> {
                 }
             }
         }
-        return map;
     }
 }
+

@@ -37,14 +37,8 @@ public class MainWorker {
             case "executor":
                 startThreadExecutor();
                 break;
-//            case "semaphore":
-//                startThreadSemaphore();  // -
-//                break;
-//            case "cyclic barrier": // -
-//                cycleBarrier();
-//                break;
-
-            default:
+            case "barrier":
+                startThreadBarrier();
                 break;
         }
 
@@ -87,11 +81,11 @@ public class MainWorker {
         countDownLatch.await();
     }
 
-    private void startThreadExecutor() { // +
+    private void startThreadExecutor() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(new ThreadExecutor2(dataFromFile, map, "Thread-Executor-2")));
-        futures.add(executorService.submit(new ThreadExecutor2(dataFromFile, map, "Thread-Executor-2")));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
         for (Future future : futures) {
             try {
                 future.get();
@@ -99,32 +93,24 @@ public class MainWorker {
                 e.printStackTrace();
             }
         }
-
-        executorService.shutdown();
     }
 
 
-//    private void cycleBarrier() {
-//        CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("clean up job after all tasks are done."));
-//
-//        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
-//        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
-//
-//        t.start();
-//        t1.start();
-//
-//
-//    }
-//    private void startThreadSemaphore() {
-//        //   ExecutorService executorService = Executors.newFixedThreadPool(2);
-//        Semaphore sem = new Semaphore(2);
-//        Thread t = new Thread(new ThreadUserSemaphore(dataFromFile, map, sem, "Thread-Semaphore-1"));
-//        Thread t1 = new Thread(new ThreadUserSemaphore(dataFromFile, map, sem, "Thread-Semaphore-2"));
-//
-//        t.start();
-//        t1.start();
-//
-//    }
+    private void startThreadBarrier() {
+        CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("All tasks is done."));
+
+        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
+        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
+
+        t.start();
+        t1.start();
+
+        try {
+            barrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void beforeThread() {
         map = new HashMap<>();
