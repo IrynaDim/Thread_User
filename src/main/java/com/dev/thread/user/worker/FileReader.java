@@ -3,12 +3,11 @@ package com.dev.thread.user.worker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class FileReader {
     public static Queue<String> readFromFile(String fileName) {
         File file = new File(fileName);
-        Queue<String> textFromFile = new ConcurrentLinkedQueue<>();
+        Queue<String> textFromFile = new ArrayDeque<>();
         try {
             Scanner sc = new Scanner(file);
             while (sc.hasNextLine()) {

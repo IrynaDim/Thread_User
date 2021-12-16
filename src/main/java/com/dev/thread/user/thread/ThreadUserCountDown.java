@@ -1,19 +1,21 @@
-package com.dev.thread.user.util;
+package com.dev.thread.user.thread;
 
 import com.dev.thread.user.model.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 
-public class ThreadUser implements Runnable {
+@Data
+@AllArgsConstructor
+public class ThreadUserCountDown extends Thread {
+    private final CountDownLatch countDownLatch;
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
-
-    public ThreadUser(Queue<String> dataFromFile, Map<String, User> map) {
-        this.dataFromFile = dataFromFile;
-        this.map = map;
-    }
 
     @Override
     public void run() {
@@ -40,5 +42,6 @@ public class ThreadUser implements Runnable {
                 }
             }
         }
+        countDownLatch.countDown();
     }
 }

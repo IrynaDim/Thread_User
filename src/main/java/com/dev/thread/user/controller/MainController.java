@@ -1,9 +1,8 @@
 package com.dev.thread.user.controller;
 
 import com.dev.thread.user.worker.MainWorker;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.SQLException;
 
 @RestController
 @RequestMapping("/main")
@@ -15,7 +14,9 @@ public class MainController {
     }
 
     @PostMapping("/{version}")
-    public void getRandom(@PathVariable String version) throws InterruptedException, SQLException {
+    public void getRandom(
+            @ApiParam(allowableValues = "join,join array,count down,executor")
+            @PathVariable String version) throws InterruptedException {
         worker.testThread(version);
     }
 }
