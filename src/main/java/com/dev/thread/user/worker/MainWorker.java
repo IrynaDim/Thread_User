@@ -37,14 +37,17 @@ public class MainWorker {
             case "executor":
                 startThreadExecutor();
                 break;
-//            case "semaphore":
-//                startThreadSemaphore();  // -
-//                break;
-//            case "cyclic barrier": // -
-//                cycleBarrier();
-//                break;
-
-            default:
+            case "executor2":
+                startThreadExecutor2();
+                break;
+            case "executor3":
+                startThreadExecutor3();
+                break;
+            case "executor4":
+                startThreadExecutorCompletion();
+                break;
+            case "barrier":
+                startThreadBarrier();
                 break;
         }
 
@@ -87,11 +90,11 @@ public class MainWorker {
         countDownLatch.await();
     }
 
-    private void startThreadExecutor() { // +
+    private void startThreadExecutor() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(new ThreadExecutor2(dataFromFile, map, "Thread-Executor-2")));
-        futures.add(executorService.submit(new ThreadExecutor2(dataFromFile, map, "Thread-Executor-2")));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
         for (Future future : futures) {
             try {
                 future.get();
@@ -99,32 +102,75 @@ public class MainWorker {
                 e.printStackTrace();
             }
         }
-
-        executorService.shutdown();
     }
 
+    private void startThreadExecutor2() {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1");
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2");
+        executorService.submit(t);
+        executorService.submit(t1);
 
-//    private void cycleBarrier() {
-//        CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("clean up job after all tasks are done."));
-//
-//        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
-//        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
-//
-//        t.start();
-//        t1.start();
-//
-//
-//    }
-//    private void startThreadSemaphore() {
-//        //   ExecutorService executorService = Executors.newFixedThreadPool(2);
-//        Semaphore sem = new Semaphore(2);
-//        Thread t = new Thread(new ThreadUserSemaphore(dataFromFile, map, sem, "Thread-Semaphore-1"));
-//        Thread t1 = new Thread(new ThreadUserSemaphore(dataFromFile, map, sem, "Thread-Semaphore-2"));
-//
-//        t.start();
-//        t1.start();
-//
-//    }
+        t.awaitTerminationAfterShutdown(executorService);
+        t1.awaitTerminationAfterShutdown(executorService);
+
+    }
+
+    private void startThreadExecutor3() {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1");
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2");
+        executorService.execute(t);
+        executorService.execute(t1);
+
+        executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startThreadExecutorCompletion() {
+        final ExecutorService pool = Executors.newFixedThreadPool(2);
+        final CompletionService<Map<String, User>> service = new ExecutorCompletionService<>(pool);
+        final List<? extends Callable<Map<String, User>>> callables = Arrays.asList(
+                new ThreadUserCompletion(dataFromFile, map),
+                new ThreadUserCompletion(dataFromFile, map)
+        );
+
+        for (final Callable<Map<String, User>> callable : callables) {
+            service.submit(callable);
+        }
+
+        pool.shutdown();
+
+        try {
+            while (!pool.isTerminated()) {
+                final Future<Map<String, User>> future = service.take();
+                System.out.println("Thread is stop");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startThreadBarrier() {
+        CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("All tasks is done."));
+
+        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
+        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
+
+        t.start();
+        t1.start();
+
+        try {
+            barrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void beforeThread() {
         map = new HashMap<>();
@@ -133,5 +179,3 @@ public class MainWorker {
         userDaoMongo.clearTable();
     }
 }
-
-//коллбек

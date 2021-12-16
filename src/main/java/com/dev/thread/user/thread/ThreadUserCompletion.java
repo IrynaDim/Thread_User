@@ -6,15 +6,15 @@ import lombok.Data;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 
 @Data
-public class ThreadExecutor2 implements Runnable {
+public class ThreadUserCompletion implements Callable<Map<String, User>> {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
-    private final String name;
 
     @Override
-    public void run() {
+    public Map<String, User> call() {
         while (!dataFromFile.isEmpty()) {
 
             System.out.println(Thread.currentThread().getName());
@@ -38,6 +38,6 @@ public class ThreadExecutor2 implements Runnable {
                 }
             }
         }
+        return map;
     }
 }
-

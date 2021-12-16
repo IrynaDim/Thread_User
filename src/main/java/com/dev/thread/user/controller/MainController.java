@@ -15,7 +15,7 @@ public class MainController {
 
     @PostMapping("/{version}")
     public void getRandom(
-            @ApiParam(allowableValues = "join,join array,count down,executor")
+            @ApiParam(allowableValues = "join,join array,count down,executor,executor2,executor3,barrier")
             @PathVariable String version) throws InterruptedException {
         worker.testThread(version);
     }

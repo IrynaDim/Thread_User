@@ -43,6 +43,8 @@ public class ThreadUserCyclicBarrier implements Runnable {
                     }
                 }
             }
+            System.out.println(Thread.currentThread().getName()
+                    + " waiting for others to reach barrier.");
             barrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();

@@ -1,9 +1,7 @@
 package com.dev.thread.user.thread;
 
 import com.dev.thread.user.model.User;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,6 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
 @Data
-@AllArgsConstructor
 public class ThreadUserCountDown extends Thread {
     private final CountDownLatch countDownLatch;
     private final Queue<String> dataFromFile;
