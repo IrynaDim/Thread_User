@@ -1,0 +1,11 @@
+1,lev,100
+2,shani,200
+3,lior,-10
+4,sigal,80
+5,dima,-70
+3,lev,-50
+6,shaul,50
+7,itay,90
+1,lev,-30
+8,lev,30
+1,shaul,-80

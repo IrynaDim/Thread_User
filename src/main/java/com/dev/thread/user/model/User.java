@@ -1,6 +1,8 @@
 package com.dev.thread.user.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,6 +11,8 @@ import java.io.Serializable;
 
 @Data
 @Document(collection = User.COLLECTION_NAME)
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements Serializable {
     public static final String COLLECTION_NAME = "users";
 
