@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,7 @@ public class ThreadUserCyclicBarrier implements Runnable {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
     private CyclicBarrier barrier;
+    private final ReentrantLock lock = new ReentrantLock();
 
     @Override
     public void run() {
@@ -24,22 +26,19 @@ public class ThreadUserCyclicBarrier implements Runnable {
 
                 System.out.println(Thread.currentThread().getName());
 
-                String string;
-                synchronized (dataFromFile) {
-                    string = dataFromFile.peek();
-                    dataFromFile.remove(string);
-                }
-                List<String> data = (List.of(string.split(",")));
-                User user = new User();
-                user.setName(data.get(1));
-                user.setSum(Double.valueOf(data.get(2)));
-                synchronized (map) {
-                    User userFromMap = map.get(user.getName());
-                    if (userFromMap == null) {
-                        map.put(user.getName(), user);
-                    } else {
-                        userFromMap.setSum(userFromMap.getSum() + user.getSum());
-                        map.put(userFromMap.getName(), userFromMap);
+                String string = dataFromFile.poll();
+
+                if (string != null) {
+                    String[] strings = string.split(",");
+                    String name = strings[1];
+                    Double sum = Double.valueOf(strings[2]);
+                    User user = new User();
+                    user.setName(name);
+                    user.setSum(sum);
+
+                    synchronized (map) {
+                        map.put(name, map.containsKey(name)
+                                ? new User(null, name, map.get(name).getSum() + sum) : user);
                     }
                 }
             }
