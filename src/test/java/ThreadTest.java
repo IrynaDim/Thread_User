@@ -97,4 +97,13 @@ public class ThreadTest {
         Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version7, FILE_NAME)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
+
+//    @Test
+//    public void version_8_Ok() {
+//        doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
+//        doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
+//        String version8 = "executor4";
+//        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version8, FILE_NAME)
+//                .stream().sorted(Comparator.comparing(User::getName)).toArray());
+//    }
 }

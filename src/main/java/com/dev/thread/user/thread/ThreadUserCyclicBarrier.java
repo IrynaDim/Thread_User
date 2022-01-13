@@ -5,16 +5,14 @@ import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.locks.ReentrantLock;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 public class ThreadUserCyclicBarrier extends AbstractThread implements Runnable {
@@ -27,6 +25,7 @@ public class ThreadUserCyclicBarrier extends AbstractThread implements Runnable 
                                    UserDaoMongo userDaoMongo) {
         super(dataFromFile, map, userDaoJdbc, userDaoMongo);
         this.barrier = barrier;
+        new Thread(this).start();
     }
 
     @Override

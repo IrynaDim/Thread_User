@@ -22,13 +22,13 @@ public class ThreadUserCountDown extends AbstractThread implements Runnable {
                                UserDaoMongo userDaoMongo) {
         super(dataFromFile, map, userDaoJdbc, userDaoMongo);
         this.countDownLatch = countDownLatch;
+        new Thread(this).start();
     }
 
     @Override
     public void run() {
         addToMap();
         addToDb();
-
-        countDownLatch.countDown();
+        countDownLatch.countDown(); // счетчик отсчитывает
     }
 }
