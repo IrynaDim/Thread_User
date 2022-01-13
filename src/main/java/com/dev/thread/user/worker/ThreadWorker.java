@@ -36,7 +36,8 @@ public class ThreadWorker {
                 return new ArrayList<>(startThreadExecutorCompletion(fileName).values());
             case "barrier":
                 return new ArrayList<>(startThreadBarrier(fileName).values());
-            default: return null;
+            default:
+                return null;
         }
     }
 
@@ -46,9 +47,7 @@ public class ThreadWorker {
 
         ThreadUserJoin dataFromFileReading = new ThreadUserJoin(dataFromFile, map, userDaoJdbc, userDaoMongo);
         Thread t = new Thread(dataFromFileReading);
-        t.setName("Thread-One");
         Thread t1 = new Thread(dataFromFileReading);
-        t1.setName("Thread-Two");
 
         t.start();
         t1.start();
@@ -95,8 +94,8 @@ public class ThreadWorker {
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2", userDaoJdbc, userDaoMongo)));
-        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2", userDaoJdbc, userDaoMongo)));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo)));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo)));
         for (Future future : futures) {
             try {
                 future.get();
@@ -114,8 +113,8 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1", userDaoJdbc, userDaoMongo);
-        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2", userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
         executorService.submit(t);
         executorService.submit(t1);
 
@@ -130,8 +129,8 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1", userDaoJdbc, userDaoMongo);
-        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2", userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
         executorService.execute(t);
         executorService.execute(t1);
 
@@ -179,8 +178,8 @@ public class ThreadWorker {
 
         CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("All tasks is done."));
 
-        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier, userDaoJdbc, userDaoMongo));
-        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier, userDaoJdbc, userDaoMongo));
+        Thread t = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
+        Thread t1 = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
 
         t.start();
         t1.start();
