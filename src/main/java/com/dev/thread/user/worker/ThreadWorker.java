@@ -1,5 +1,7 @@
 package com.dev.thread.user.worker;
 
+import com.dev.thread.user.dao.UserDaoJdbc;
+import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
 import com.dev.thread.user.thread.*;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,13 @@ import java.util.concurrent.*;
 
 @Service
 public class ThreadWorker {
+    private final UserDaoJdbc userDaoJdbc;
+    private final UserDaoMongo userDaoMongo;
+
+    public ThreadWorker(UserDaoJdbc userDaoJdbc, UserDaoMongo userDaoMongo) {
+        this.userDaoJdbc = userDaoJdbc;
+        this.userDaoMongo = userDaoMongo;
+    }
 
     public List<User> chooseVersion(String version, String fileName) {
         switch (version) {
@@ -27,7 +36,8 @@ public class ThreadWorker {
                 return new ArrayList<>(startThreadExecutorCompletion(fileName).values());
             case "barrier":
                 return new ArrayList<>(startThreadBarrier(fileName).values());
-            default: return null;
+            default:
+                return null;
         }
     }
 
@@ -35,17 +45,14 @@ public class ThreadWorker {
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
-        ThreadUserJoin dataFromFileReading = new ThreadUserJoin(dataFromFile, map);
+        ThreadUserJoin dataFromFileReading = new ThreadUserJoin(dataFromFile, map, userDaoJdbc, userDaoMongo);
         Thread t = new Thread(dataFromFileReading);
-        t.setName("Thread-One");
         Thread t1 = new Thread(dataFromFileReading);
-        t1.setName("Thread-Two");
 
         t.start();
         t1.start();
 
         try {
-
             switch (version) {
                 case "join":
                     dataFromFileReading.completionJoin(t, t1);
@@ -56,6 +63,9 @@ public class ThreadWorker {
             e.printStackTrace();
         }
 
+        t.interrupt();
+        t1.interrupt();
+
         return map;
     }
 
@@ -64,10 +74,10 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        ExecutorService executor = Executors.newFixedThreadPool(2); // два потока в пуле
+        ExecutorService executor = Executors.newFixedThreadPool(2);
 
-        ThreadUserCountDown t = new ThreadUserCountDown(countDownLatch, dataFromFile, map);
-        ThreadUserCountDown t1 = new ThreadUserCountDown(countDownLatch, dataFromFile, map);
+        ThreadUserCountDown t = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
+        ThreadUserCountDown t1 = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
 
         executor.submit(t);
         executor.submit(t1);
@@ -87,8 +97,8 @@ public class ThreadWorker {
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
-        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2")));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo)));
+        futures.add(executorService.submit(new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo)));
         for (Future future : futures) {
             try {
                 future.get();
@@ -106,8 +116,8 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1");
-        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2");
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
         executorService.submit(t);
         executorService.submit(t1);
 
@@ -122,8 +132,8 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-1");
-        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, "Thread-Executor-2");
+        ThreadUserExecutor t = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
+        ThreadUserExecutor t1 = new ThreadUserExecutor(dataFromFile, map, userDaoJdbc, userDaoMongo);
         executorService.execute(t);
         executorService.execute(t1);
 
@@ -144,8 +154,8 @@ public class ThreadWorker {
         final ExecutorService pool = Executors.newFixedThreadPool(2);
         final CompletionService<Map<String, User>> service = new ExecutorCompletionService<>(pool);
         final List<? extends Callable<Map<String, User>>> callables = Arrays.asList(
-                new ThreadUserCompletion(dataFromFile, map),
-                new ThreadUserCompletion(dataFromFile, map)
+                new ThreadUserCompletion(dataFromFile, map, userDaoJdbc, userDaoMongo),
+                new ThreadUserCompletion(dataFromFile, map, userDaoJdbc, userDaoMongo)
         );
 
         for (final Callable<Map<String, User>> callable : callables) {
@@ -156,7 +166,7 @@ public class ThreadWorker {
 
         try {
             while (!pool.isTerminated()) {
-                final Future<Map<String, User>> future = service.take();
+                service.take();
                 System.out.println("Thread is stop");
             }
         } catch (InterruptedException e) {
@@ -171,8 +181,8 @@ public class ThreadWorker {
 
         CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("All tasks is done."));
 
-        Thread t = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
-        Thread t1 = new Thread(new ThreadUserCyclicBarrier(dataFromFile, map, barrier));
+        Thread t = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
+        Thread t1 = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
 
         t.start();
         t1.start();
@@ -182,6 +192,9 @@ public class ThreadWorker {
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
+
+        t.interrupt();
+        t1.interrupt();
 
         return map;
     }

@@ -1,5 +1,7 @@
 package com.dev.thread.user.thread;
 
+import com.dev.thread.user.dao.UserDaoJdbc;
+import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
 import lombok.Data;
 
@@ -8,35 +10,19 @@ import java.util.Map;
 import java.util.Queue;
 
 @Data
-public class ThreadUserJoin implements Runnable {
-    private final Queue<String> dataFromFile;
-    private final Map<String, User> map;
+public class ThreadUserJoin extends AbstractThread implements Runnable {
+
+    public ThreadUserJoin(Queue<String> dataFromFile,
+                          Map<String, User> map,
+                          UserDaoJdbc userDaoJdbc,
+                          UserDaoMongo userDaoMongo) {
+        super(dataFromFile, map, userDaoJdbc, userDaoMongo);
+    }
 
     @Override
     public void run() {
-        while (!dataFromFile.isEmpty()) {
-
-            System.out.println(Thread.currentThread().getName());
-
-            String string;
-            synchronized (dataFromFile) {
-                string = dataFromFile.peek();
-                dataFromFile.remove(string);
-            }
-            List<String> data = (List.of(string.split(",")));
-            User user = new User();
-            user.setName(data.get(1));
-            user.setSum(Double.valueOf(data.get(2)));
-            synchronized (map) {
-                User userFromMap = map.get(user.getName());
-                if (userFromMap == null) {
-                    map.put(user.getName(), user);
-                } else {
-                    userFromMap.setSum(userFromMap.getSum() + user.getSum());
-                    map.put(userFromMap.getName(), userFromMap);
-                }
-            }
-        }
+        addToMap();
+        addToDb();
     }
 
     public void completionJoin(Thread t, Thread t1) throws InterruptedException {

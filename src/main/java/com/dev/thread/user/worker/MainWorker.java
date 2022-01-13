@@ -2,11 +2,9 @@ package com.dev.thread.user.worker;
 
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
-import com.dev.thread.user.model.User;
 
 import org.springframework.stereotype.Service;
 
-import java.util.*;
 
 @Service
 public class MainWorker {
@@ -23,11 +21,7 @@ public class MainWorker {
 
     public void testThread(String version) {
         beforeThread();
-
-        List<User> usersList = threadWorker.chooseVersion(version, FILE_NAME);
-
-        userDaoJdbc.saveAll(usersList);
-        userDaoMongo.saveAll(usersList);
+        threadWorker.chooseVersion(version, FILE_NAME);
     }
 
     private void beforeThread() {
