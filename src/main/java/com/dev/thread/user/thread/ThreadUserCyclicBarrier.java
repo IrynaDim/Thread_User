@@ -1,9 +1,12 @@
 package com.dev.thread.user.thread;
 
+import com.dev.thread.user.dao.UserDaoJdbc;
+import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -17,17 +20,17 @@ public class ThreadUserCyclicBarrier implements Runnable {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
     private CyclicBarrier barrier;
-    private final ReentrantLock lock = new ReentrantLock();
+    private final UserDaoJdbc userDaoJdbc;
+    private final UserDaoMongo userDaoMongo;
 
     @Override
     public void run() {
         try {
             while (!dataFromFile.isEmpty()) {
-
-                System.out.println(Thread.currentThread().getName());
-
-                String string = dataFromFile.poll();
-
+                String string;
+                synchronized (dataFromFile) {
+                    string = dataFromFile.poll();
+                }
                 if (string != null) {
                     String[] strings = string.split(",");
                     String name = strings[1];
@@ -42,6 +45,8 @@ public class ThreadUserCyclicBarrier implements Runnable {
                     }
                 }
             }
+            userDaoJdbc.saveAll(new ArrayList<>(map.values()));
+            userDaoMongo.saveAll(new ArrayList<>(map.values()));
             System.out.println(Thread.currentThread().getName()
                     + " waiting for others to reach barrier.");
             barrier.await();

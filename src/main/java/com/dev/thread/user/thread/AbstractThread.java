@@ -3,26 +3,26 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import lombok.Data;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
-@Data
-public class ThreadUserExecutor implements Runnable {
+public class AbstractThread {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
-    private final String name;
     private final UserDaoJdbc userDaoJdbc;
     private final UserDaoMongo userDaoMongo;
 
-    @Override
-    public void run() {
+    public AbstractThread(Queue<String> dataFromFile, Map<String, User> map, UserDaoJdbc userDaoJdbc, UserDaoMongo userDaoMongo) {
+        this.dataFromFile = dataFromFile;
+        this.map = map;
+        this.userDaoJdbc = userDaoJdbc;
+        this.userDaoMongo = userDaoMongo;
+    }
+
+    public void addToMap() {
         while (!dataFromFile.isEmpty()) {
             String string;
             synchronized (dataFromFile) {
@@ -42,20 +42,10 @@ public class ThreadUserExecutor implements Runnable {
                 }
             }
         }
+    }
+
+    public void addToDb() {
         userDaoJdbc.saveAll(new ArrayList<>(map.values()));
         userDaoMongo.saveAll(new ArrayList<>(map.values()));
     }
-
-    public void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdown();
-        try {
-            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                threadPool.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            threadPool.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-    }
 }
-

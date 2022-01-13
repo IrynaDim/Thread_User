@@ -1,29 +1,29 @@
 package com.dev.thread.user.thread;
 
+import com.dev.thread.user.dao.UserDaoJdbc;
+import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
 import lombok.Data;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Data
 public class ThreadUserCompletion implements Callable<Map<String, User>> {
     private final Queue<String> dataFromFile;
     private final Map<String, User> map;
-    private final ReentrantLock lock = new ReentrantLock();
+    private final UserDaoJdbc userDaoJdbc;
+    private final UserDaoMongo userDaoMongo;
 
     @Override
     public Map<String, User> call() {
         while (!dataFromFile.isEmpty()) {
-
-            System.out.println(Thread.currentThread().getName());
-
-            String string = dataFromFile.poll();
-
+            String string;
+            synchronized (dataFromFile) {
+                string = dataFromFile.poll();
+            }
             if (string != null) {
                 String[] strings = string.split(",");
                 String name = strings[1];
@@ -38,6 +38,8 @@ public class ThreadUserCompletion implements Callable<Map<String, User>> {
                 }
             }
         }
+        userDaoJdbc.saveAll(new ArrayList<>(map.values()));
+        userDaoMongo.saveAll(new ArrayList<>(map.values()));
         return map;
     }
 }
