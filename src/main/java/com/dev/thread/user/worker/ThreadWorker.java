@@ -42,6 +42,8 @@ public class ThreadWorker {
     }
 
     private Map<String, User> startThreadJoin(String version, String fileName) {
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
@@ -66,32 +68,37 @@ public class ThreadWorker {
         t.interrupt();
         t1.interrupt();
 
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Join: " + elapsed / 1000000);
         return map;
     }
 
-    private Map<String, User> startThreadCountDown(String fileName) {
+    private Map<String, User> startThreadCountDown(String fileName) { // done
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        ThreadUserCountDown t = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
-        ThreadUserCountDown t1 = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
-
-        executor.submit(t);
-        executor.submit(t1);
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
+        new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
 
         try {
-            countDownLatch.await();
+            countDownLatch.await(); // ждет завершения всех потоков
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Count down: " + elapsed / 1000000);
         return map;
     }
 
     private Map<String, User> startThreadExecutor(String fileName) {
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
@@ -108,10 +115,14 @@ public class ThreadWorker {
         }
         executorService.shutdown();
 
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Executor: " + elapsed / 1000000);
         return map;
     }
 
     private Map<String, User> startThreadExecutor2(String fileName) {
+        long start = System.nanoTime();
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
@@ -124,10 +135,15 @@ public class ThreadWorker {
         t.awaitTerminationAfterShutdown(executorService);
         t1.awaitTerminationAfterShutdown(executorService);
 
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Executor2: " + elapsed / 1000000);
         return map;
     }
 
     private Map<String, User> startThreadExecutor3(String fileName) {
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
@@ -144,10 +160,16 @@ public class ThreadWorker {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Executor3: " + elapsed / 1000000);
         return map;
     }
 
     private Map<String, User> startThreadExecutorCompletion(String fileName) {
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
@@ -167,35 +189,30 @@ public class ThreadWorker {
         try {
             while (!pool.isTerminated()) {
                 service.take();
-                System.out.println("Thread is stop");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Executor4: " + elapsed / 1000000);
         return map;
     }
 
-    private Map<String, User> startThreadBarrier(String fileName) {
+    private Map<String, User> startThreadBarrier(String fileName) { // done
+        long start = System.nanoTime();
+
         Map<String, User> map = new HashMap<>();
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
-        CyclicBarrier barrier = new CyclicBarrier(2, () -> System.out.println("All tasks is done."));
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo);
+        new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo);
 
-        Thread t = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
-        Thread t1 = new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, userDaoJdbc, userDaoMongo));
-
-        t.start();
-        t1.start();
-
-        try {
-            barrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-
-        t.interrupt();
-        t1.interrupt();
-
+        long finish = System.nanoTime();
+        long elapsed = finish - start;
+        System.out.println("Barrier: " + elapsed / 1000000);
         return map;
     }
 }

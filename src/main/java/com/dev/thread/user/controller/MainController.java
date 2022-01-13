@@ -15,7 +15,7 @@ public class MainController {
 
     @PostMapping("/{version}")
     public void addUsers(
-            @ApiParam(allowableValues = "join,join array,count down,executor,executor2,executor3,barrier")
+            @ApiParam(allowableValues = "join,join array,count down,executor,executor2,executor3,executor4,barrier")
             @PathVariable String version) throws InterruptedException {
         worker.testThread(version);
     }
