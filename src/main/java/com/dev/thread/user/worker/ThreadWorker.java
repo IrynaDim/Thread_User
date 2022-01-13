@@ -63,6 +63,9 @@ public class ThreadWorker {
             e.printStackTrace();
         }
 
+        t.interrupt();
+        t1.interrupt();
+
         return map;
     }
 
@@ -71,7 +74,7 @@ public class ThreadWorker {
         Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        ExecutorService executor = Executors.newFixedThreadPool(2); // два потока в пуле
+        ExecutorService executor = Executors.newFixedThreadPool(2);
 
         ThreadUserCountDown t = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
         ThreadUserCountDown t1 = new ThreadUserCountDown(countDownLatch, dataFromFile, map, userDaoJdbc, userDaoMongo);
@@ -163,7 +166,7 @@ public class ThreadWorker {
 
         try {
             while (!pool.isTerminated()) {
-                final Future<Map<String, User>> future = service.take();
+                service.take();
                 System.out.println("Thread is stop");
             }
         } catch (InterruptedException e) {
@@ -189,6 +192,9 @@ public class ThreadWorker {
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
+
+        t.interrupt();
+        t1.interrupt();
 
         return map;
     }

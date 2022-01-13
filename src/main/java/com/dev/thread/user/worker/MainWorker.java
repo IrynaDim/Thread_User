@@ -22,9 +22,6 @@ public class MainWorker {
     public void testThread(String version) {
         beforeThread();
         threadWorker.chooseVersion(version, FILE_NAME);
-
-//        userDaoJdbc.saveAll(usersList);
-//        userDaoMongo.saveAll(usersList);
     }
 
     private void beforeThread() {
