@@ -48,22 +48,13 @@ public class ThreadTest {
     public void version_2_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
-        String version2 = "join array";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version2, FILE_NAME)
-                .stream().sorted(Comparator.comparing(User::getName)).toArray());
-    }
-
-    @Test
-    public void version_3_Ok() {
-        doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
-        doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version3 = "count down";
         Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version3, FILE_NAME)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
     @Test
-    public void version_4_Ok() {
+    public void version_3_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version4 = "executor";
@@ -72,7 +63,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_5_Ok() {
+    public void version_4_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version5 = "executor2";
@@ -81,16 +72,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_6_Ok() {
-        doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
-        doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
-        String version6 = "executor3";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version6, FILE_NAME)
-                .stream().sorted(Comparator.comparing(User::getName)).toArray());
-    }
-
-    @Test
-    public void version_7_Ok() {
+    public void version_5_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version7 = "barrier";
@@ -98,12 +80,12 @@ public class ThreadTest {
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
-//    @Test
-//    public void version_8_Ok() {
-//        doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
-//        doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
-//        String version8 = "executor4";
-//        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version8, FILE_NAME)
-//                .stream().sorted(Comparator.comparing(User::getName)).toArray());
-//    }
+    @Test
+    public void version_6_Ok() {
+        doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
+        doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
+        String version8 = "completionService";
+        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version8, FILE_NAME)
+                .stream().sorted(Comparator.comparing(User::getName)).toArray());
+    }
 }

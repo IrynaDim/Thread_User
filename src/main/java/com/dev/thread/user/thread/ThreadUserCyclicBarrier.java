@@ -32,10 +32,10 @@ public class ThreadUserCyclicBarrier extends AbstractThread implements Runnable 
     public void run() {
         try {
             addToMap();
-            addToDb();
             barrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
+        addToDb();
     }
 }

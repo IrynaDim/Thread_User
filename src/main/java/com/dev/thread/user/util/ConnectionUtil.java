@@ -14,7 +14,7 @@ public class ConnectionUtil {
         }
     }
 
-    public static Connection getConnectionSql() throws SQLException {
+    public static Connection getConnectionSql() {
         Connection conn;
         Properties connectionProps = new Properties();
         connectionProps.put("user","root");
