@@ -26,17 +26,11 @@ public class ThreadCyclicBarrier extends AbstractThread {
 
         super.run();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ExecutorService writers = Executors.newFixedThreadPool(2);
         executorService.execute(this::add);
         executorService.execute(this::add);
-
-        try {
-            barrier.await();
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-
         executorService.shutdown();
+
+        ExecutorService writers = Executors.newFixedThreadPool(2);
         writers.execute(this::addToMySQL);
         writers.execute(this::addToMongoDB);
         writers.shutdown();

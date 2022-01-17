@@ -51,11 +51,6 @@ public abstract class AbstractThread implements ThreadService {
         }
     }
 
-    public void addToDb() {
-        userDaoJdbc.saveAll(new ArrayList<>(map.values()));
-        userDaoMongo.saveAll(new ArrayList<>(map.values()));
-    }
-
     public void addToMongoDB() {
         userDaoMongo.saveAll(new ArrayList<>(map.values()));
     }
