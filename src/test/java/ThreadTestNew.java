@@ -1,18 +1,22 @@
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
+import com.dev.thread.user.worker.MainWorker;
 import com.dev.thread.user.worker.ThreadWorker;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-import java.util.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
-public class ThreadTest {
+public class ThreadTestNew {
 
-    private ThreadWorker threadWorker;
+    private MainWorker threadWorker;
     private UserDaoJdbc userDaoJdbc;
     private UserDaoMongo userDaoMongo;
     private static final String FILE_NAME = "input.txt";
@@ -30,7 +34,7 @@ public class ThreadTest {
     public void init() {
         userDaoJdbc = mock(UserDaoJdbc.class);
         userDaoMongo = mock(UserDaoMongo.class);
-        threadWorker = new ThreadWorker(userDaoJdbc, userDaoMongo);
+        threadWorker = new MainWorker(userDaoJdbc, userDaoMongo);
     }
 
 
@@ -39,7 +43,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version1 = "join";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version1, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version1)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -48,7 +52,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version3 = "count down";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version3, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version3)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -57,7 +61,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version4 = "executor";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version4, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version4)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -66,7 +70,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version5 = "executor2";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version5, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version5)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -75,7 +79,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version6 = "completionService";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version6, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version6)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -84,7 +88,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version7 = "barrier";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.chooseVersion(version7, FILE_NAME)
+        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version7)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 }

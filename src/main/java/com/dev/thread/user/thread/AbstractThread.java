@@ -6,6 +6,8 @@ import com.dev.thread.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -14,7 +16,7 @@ import java.util.Queue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AbstractThread {
+public abstract class AbstractThread {
     private Queue<String> dataFromFile;
     private Map<String, User> map;
     private UserDaoJdbc userDaoJdbc;
@@ -46,4 +48,6 @@ public class AbstractThread {
         userDaoJdbc.saveAll(new ArrayList<>(map.values()));
         userDaoMongo.saveAll(new ArrayList<>(map.values()));
     }
+
+    public abstract Map<String, User> startThread(String fileName);
 }
