@@ -3,6 +3,7 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
+import com.dev.thread.user.worker.FileReader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,7 +27,6 @@ public class ThreadUserCyclicBarrier extends AbstractThread implements Runnable 
                                    UserDaoMongo userDaoMongo) {
         super(dataFromFile, map, userDaoJdbc, userDaoMongo);
         this.barrier = barrier;
-        new Thread(this).start();
     }
 
     @Override
@@ -41,14 +41,15 @@ public class ThreadUserCyclicBarrier extends AbstractThread implements Runnable 
     }
 
     @Override
-    public Map<String, User> startThread() {
+    public Map<String, User> startThread(String fileName) {
         long start = System.nanoTime();
 
         Map<String, User> map = new HashMap<>();
+        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         CyclicBarrier barrier = new CyclicBarrier(2);
-        new ThreadUserCyclicBarrier(barrier, super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
-        new ThreadUserCyclicBarrier(barrier, super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo())).start();
+        new Thread(new ThreadUserCyclicBarrier(barrier, dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo())).start();
         try {
             barrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {

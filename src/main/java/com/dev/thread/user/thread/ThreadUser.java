@@ -3,6 +3,7 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
+import com.dev.thread.user.worker.FileReader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,12 +32,13 @@ public class ThreadUser extends AbstractThread implements Runnable {
     }
 
     @Override
-    public Map<String, User> startThread() {
+    public Map<String, User> startThread(String fileName) {
         long start = System.nanoTime();
 
         Map<String, User> map = new HashMap<>();
+        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
-        ThreadUser threadUser = new ThreadUser(super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        ThreadUser threadUser = new ThreadUser(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo());
         Thread t = new Thread(threadUser);
         Thread t1 = new Thread(threadUser);
         t.start();

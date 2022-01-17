@@ -47,5 +47,5 @@ public abstract class AbstractThread {
         userDaoMongo.saveAll(new ArrayList<>(map.values()));
     }
 
-    public abstract Map<String, User> startThread();
+    public abstract Map<String, User> startThread(String fileName);
 }

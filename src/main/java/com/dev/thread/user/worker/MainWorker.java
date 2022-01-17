@@ -34,7 +34,7 @@ public class MainWorker {
 
     public List<User> testThread(String version) {
         beforeThread();
-        return new ArrayList<>(commands.get(version).startThread().values());
+        return new ArrayList<>(commands.get(version).startThread(FILE_NAME).values());
     }
 
     private void beforeThread() {
