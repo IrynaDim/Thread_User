@@ -3,22 +3,31 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import lombok.AllArgsConstructor;
+import com.dev.thread.user.util.FileReader;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AbstractThread {
+public abstract class AbstractThread implements ThreadService {
     private Queue<String> dataFromFile;
-    private Map<String, User> map;
+    private final Map<String, User> map = new HashMap<>();
     private UserDaoJdbc userDaoJdbc;
     private UserDaoMongo userDaoMongo;
+    public static final int THREADS_NUMBER = 2;
+    public static final String FILE_NAME = "input.txt";
+
+    public AbstractThread(UserDaoJdbc userDaoJdbc, UserDaoMongo userDaoMongo) {
+        this.userDaoJdbc = userDaoJdbc;
+        this.userDaoMongo = userDaoMongo;
+    }
+
+    @Override
+    public Map<String, User> run() {
+        dataFromFile = FileReader.readFromFile(FILE_NAME);
+        map.clear();
+        return null;
+    }
 
     public void addToMap() {
         while (!dataFromFile.isEmpty()) {
@@ -42,8 +51,11 @@ public class AbstractThread {
         }
     }
 
-    public void addToDb() {
-        userDaoJdbc.saveAll(new ArrayList<>(map.values()));
+    public void addToMongoDB() {
         userDaoMongo.saveAll(new ArrayList<>(map.values()));
+    }
+
+    public void addToMySQL() {
+        userDaoJdbc.saveAll(new ArrayList<>(map.values()));
     }
 }

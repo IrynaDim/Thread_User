@@ -3,25 +3,40 @@ package com.dev.thread.user.worker;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 
+import com.dev.thread.user.model.User;
+import com.dev.thread.user.thread.*;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
 
 @Service
 public class MainWorker {
     private final UserDaoJdbc userDaoJdbc;
     private final UserDaoMongo userDaoMongo;
-    private final String FILE_NAME = "input.txt";
-    private final ThreadWorker threadWorker;
+    private final Map<String, AbstractThread> commands = new HashMap<>();
 
-    public MainWorker(UserDaoJdbc userDaoJdbc, UserDaoMongo userDaoMongo, ThreadWorker threadWorker) {
+    public MainWorker(UserDaoJdbc userDaoJdbc,
+                      UserDaoMongo userDaoMongo,
+                      ThreadExecutorAwait executorAwait,
+                      ThreadFuture threadFuture,
+                      ThreadJoin threadJoin,
+                      ThreadCompletion completion,
+                      ThreaCountDown countDown,
+                      ThreadCyclicBarrier cyclicBarrier) {
         this.userDaoJdbc = userDaoJdbc;
         this.userDaoMongo = userDaoMongo;
-        this.threadWorker = threadWorker;
+
+        commands.put("await", executorAwait);
+        commands.put("future", threadFuture);
+        commands.put("join", threadJoin);
+        commands.put("completionService", completion);
+        commands.put("count down", countDown);
+        commands.put("barrier", cyclicBarrier);
     }
 
-    public void testThread(String version) {
+    public List<User> testThread(String version) {
         beforeThread();
-        threadWorker.chooseVersion(version, FILE_NAME);
+        return new ArrayList<>(commands.get(version).run().values());
     }
 
     private void beforeThread() {

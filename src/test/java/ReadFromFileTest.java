@@ -1,4 +1,4 @@
-import com.dev.thread.user.worker.FileReader;
+import com.dev.thread.user.util.FileReader;
 import org.junit.Assert;
 import org.junit.Test;
 

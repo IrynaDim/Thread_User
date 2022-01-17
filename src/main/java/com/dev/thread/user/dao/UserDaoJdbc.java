@@ -29,15 +29,10 @@ public class UserDaoJdbc {
         try (Connection connection = ConnectionUtil.getConnectionSql()) {
             PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO users (user_name, sum) VALUES (?, ?)");
-            int i = 0;
             for (User user : users) {
                 ps.setString(1, user.getName());
                 ps.setDouble(2, user.getSum());
-                ps.addBatch();
-                i++;
-                if (i == users.size()) {
-                    ps.executeBatch();
-                }
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
             throw new DataProcessingException("Adding users was failed. ", e);
