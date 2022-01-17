@@ -3,36 +3,27 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.dev.thread.user.worker.FileReader;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.*;
 
-public class ThreadFuture extends AbstractThread implements Runnable {
-    public ThreadFuture(Queue<String> dataFromFile,
-                      Map<String, User> map,
-                      UserDaoJdbc userDaoJdbc,
+@Service
+public class ThreadFuture extends AbstractThread {
+    public ThreadFuture(UserDaoJdbc userDaoJdbc,
                       UserDaoMongo userDaoMongo) {
-        super(dataFromFile, map, userDaoJdbc, userDaoMongo);
+        super(userDaoJdbc, userDaoMongo);
     }
 
     @Override
-    public void run() {
-        addToMap();
-        addToDb();
-    }
-
-    @Override
-    public Map<String, User> startThread(String fileName) {
+    public Map<String, User> run() {
         long start = System.nanoTime();
 
-        Map<String, User> map = new HashMap<>();
-        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
-
+        super.run();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(new ThreadUser(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo())));
-        futures.add(executorService.submit(new ThreadUser(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo())));
+        futures.add(executorService.submit(this::addToMap));
+        futures.add(executorService.submit(this::addToMap));
         for (Future future : futures) {
             try {
                 future.get();
@@ -40,11 +31,13 @@ public class ThreadFuture extends AbstractThread implements Runnable {
                 e.printStackTrace();
             }
         }
+        executorService.submit(this::addToMongoDB);
+        executorService.submit(this::addToMySQL);
         executorService.shutdown();
 
         long finish = System.nanoTime();
         long elapsed = finish - start;
-        System.out.println("Executor: " + elapsed / 1000000);
-        return map;
+        System.out.println("Future.get(): " + elapsed / 1000000);
+        return getMap();
     }
 }

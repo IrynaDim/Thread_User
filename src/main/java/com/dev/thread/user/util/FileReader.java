@@ -1,4 +1,4 @@
-package com.dev.thread.user.worker;
+package com.dev.thread.user.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,21 +1,20 @@
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
+import com.dev.thread.user.thread.*;
 import com.dev.thread.user.worker.MainWorker;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 public class ThreadTest {
 
-    private MainWorker threadWorker;
+    private MainWorker mainWorker;
     private UserDaoJdbc userDaoJdbc;
     private UserDaoMongo userDaoMongo;
     private final List<User> result = new ArrayList<>() {{
@@ -32,16 +31,21 @@ public class ThreadTest {
     public void init() {
         userDaoJdbc = mock(UserDaoJdbc.class);
         userDaoMongo = mock(UserDaoMongo.class);
-        threadWorker = new MainWorker(userDaoJdbc, userDaoMongo);
+        mainWorker = new MainWorker(userDaoJdbc, userDaoMongo,
+                new ThreadExecutorAwait(userDaoJdbc, userDaoMongo),
+                new ThreadFuture(userDaoJdbc, userDaoMongo),
+                new ThreadJoin(userDaoJdbc, userDaoMongo),
+                new ThreadCompletion(userDaoJdbc, userDaoMongo),
+                new ThreaCountDown(userDaoJdbc, userDaoMongo),
+                new ThreadCyclicBarrier(userDaoJdbc, userDaoMongo));
     }
-
 
     @Test
     public void version_1_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version1 = "join";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version1)
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version1)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -50,7 +54,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version3 = "count down";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version3)
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version3)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -58,8 +62,8 @@ public class ThreadTest {
     public void version_3_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
-        String version4 = "executor";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version4)
+        String version4 = "future";
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version4)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -67,8 +71,8 @@ public class ThreadTest {
     public void version_4_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
-        String version5 = "executor2";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version5)
+        String version5 = "await";
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version5)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -77,7 +81,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version6 = "completionService";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version6)
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version6)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 
@@ -86,7 +90,7 @@ public class ThreadTest {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version7 = "barrier";
-        Assert.assertArrayEquals(result.toArray(), threadWorker.testThread(version7)
+        Assert.assertArrayEquals(result.toArray(), mainWorker.testThread(version7)
                 .stream().sorted(Comparator.comparing(User::getName)).toArray());
     }
 }

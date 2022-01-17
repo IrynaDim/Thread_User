@@ -8,33 +8,35 @@ import com.dev.thread.user.thread.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-
 
 @Service
 public class MainWorker {
     private final UserDaoJdbc userDaoJdbc;
     private final UserDaoMongo userDaoMongo;
-    private final String FILE_NAME = "input.txt";
     private final Map<String, AbstractThread> commands = new HashMap<>();
 
-    public MainWorker(UserDaoJdbc userDaoJdbc, UserDaoMongo userDaoMongo) {
+    public MainWorker(UserDaoJdbc userDaoJdbc,
+                      UserDaoMongo userDaoMongo,
+                      ThreadExecutorAwait executorAwait,
+                      ThreadFuture threadFuture,
+                      ThreadJoin threadJoin,
+                      ThreadCompletion completion,
+                      ThreaCountDown countDown,
+                      ThreadCyclicBarrier cyclicBarrier) {
         this.userDaoJdbc = userDaoJdbc;
         this.userDaoMongo = userDaoMongo;
-        Queue<String> dataFromFile = FileReader.readFromFile(FILE_NAME);
-        Map<String, User> map = new HashMap<>();
-        commands.put("executor2", new ThreadExecutorAwait(dataFromFile, map, userDaoJdbc, userDaoMongo));
-        commands.put("executor", new ThreadFuture(dataFromFile, map, userDaoJdbc, userDaoMongo));
-        commands.put("join", new ThreadUser(dataFromFile, map, userDaoJdbc, userDaoMongo));
-        commands.put("completionService", new ThreadUserCompletion(dataFromFile, map, userDaoJdbc, userDaoMongo));
-        commands.put("count down", new ThreadUserCountDown(new CountDownLatch(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
-        commands.put("barrier", new ThreadUserCyclicBarrier(new CyclicBarrier(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
+
+        commands.put("await", executorAwait);
+        commands.put("future", threadFuture);
+        commands.put("join", threadJoin);
+        commands.put("completionService", completion);
+        commands.put("count down", countDown);
+        commands.put("barrier", cyclicBarrier);
     }
 
     public List<User> testThread(String version) {
         beforeThread();
-        return new ArrayList<>(commands.get(version).startThread(FILE_NAME).values());
+        return new ArrayList<>(commands.get(version).run().values());
     }
 
     private void beforeThread() {
