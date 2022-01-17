@@ -3,7 +3,6 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.dev.thread.user.worker.FileReader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,15 +34,14 @@ public class ThreadUserCountDown extends AbstractThread implements Runnable {
     }
 
     @Override
-    public Map<String, User> startThread(String fileName) {
+    public Map<String, User> startThread() {
         long start = System.nanoTime();
 
         Map<String, User> map = new HashMap<>();
-        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         CountDownLatch countDownLatch = new CountDownLatch(2);
-        new ThreadUserCountDown(countDownLatch, dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo());
-        new ThreadUserCountDown(countDownLatch, dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        new ThreadUserCountDown(countDownLatch, super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        new ThreadUserCountDown(countDownLatch, super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
         try {
             countDownLatch.await(); // ждет завершения всех потоков
         } catch (InterruptedException e) {

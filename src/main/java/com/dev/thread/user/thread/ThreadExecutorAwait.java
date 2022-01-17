@@ -3,7 +3,6 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.dev.thread.user.worker.FileReader;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -36,16 +35,14 @@ public class ThreadExecutorAwait extends AbstractThread implements Runnable {
         }
     }
 
-
     @Override
-    public Map<String, User> startThread(String fileName) {
+    public Map<String, User> startThread() {
         long start = System.nanoTime();
         Map<String, User> map = new HashMap<>();
-        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ThreadExecutorAwait t = new ThreadExecutorAwait(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo());
-        ThreadExecutorAwait t1 = new ThreadExecutorAwait(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        ThreadExecutorAwait t = new ThreadExecutorAwait(super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
+        ThreadExecutorAwait t1 = new ThreadExecutorAwait(super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo());
         executorService.submit(t);
         executorService.submit(t1);
         t.awaitTerminationAfterShutdown(executorService);

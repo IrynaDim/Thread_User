@@ -30,29 +30,15 @@ public class MainWorker {
         commands.put("completionService", new ThreadUserCompletion(dataFromFile, map, userDaoJdbc, userDaoMongo));
         commands.put("count down", new ThreadUserCountDown(new CountDownLatch(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
         commands.put("barrier", new ThreadUserCyclicBarrier(new CyclicBarrier(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
-
-     //   this.threadWorker = threadWorker;
     }
 
     public List<User> testThread(String version) {
         beforeThread();
-        return new ArrayList<>(commands.get(version).startThread(FILE_NAME).values());
-        //   threadWorker.chooseVersion(version, FILE_NAME);
+        return new ArrayList<>(commands.get(version).startThread().values());
     }
 
     private void beforeThread() {
         userDaoJdbc.clearTable();
         userDaoMongo.clearTable();
     }
-//
-//    private void addToList(Map<String, AbstractThread> commands){
-//        Queue<String> dataFromFile = FileReader.readFromFile(FILE_NAME);
-//        Map<String, User> map = new HashMap<>();
-//        commands.put("executor2", new ThreadExecutorAwait(dataFromFile, map, userDaoJdbc, userDaoMongo));
-//        commands.put("executor", new ThreadFuture(dataFromFile, map, userDaoJdbc, userDaoMongo));
-//        commands.put("join", new ThreadUser(dataFromFile, map, userDaoJdbc, userDaoMongo));
-//        commands.put("completionService", new ThreadUserCompletion(dataFromFile, map, userDaoJdbc, userDaoMongo));
-//        commands.put("count down", new ThreadUserCountDown(new CountDownLatch(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
-//        commands.put("barrier", new ThreadUserCyclicBarrier(new CyclicBarrier(2), dataFromFile, map, userDaoJdbc, userDaoMongo));
-//    }
 }

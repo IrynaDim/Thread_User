@@ -3,7 +3,6 @@ package com.dev.thread.user.thread;
 import com.dev.thread.user.dao.UserDaoJdbc;
 import com.dev.thread.user.dao.UserDaoMongo;
 import com.dev.thread.user.model.User;
-import com.dev.thread.user.worker.FileReader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -30,16 +29,15 @@ public class ThreadUserCompletion extends AbstractThread implements Callable<Map
     }
 
     @Override
-    public Map<String, User> startThread(String fileName) {
+    public Map<String, User> startThread() {
         long start = System.nanoTime();
 
         Map<String, User> map = new HashMap<>();
-        Queue<String> dataFromFile = FileReader.readFromFile(fileName);
 
         final ExecutorService pool = Executors.newFixedThreadPool(2);
         final CompletionService<Map<String, User>> service = new ExecutorCompletionService<>(pool);
-        service.submit(new ThreadUserCompletion(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo()));
-        service.submit(new ThreadUserCompletion(dataFromFile, map, super.getUserDaoJdbc(), super.getUserDaoMongo()));
+        service.submit(new ThreadUserCompletion(super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo()));
+        service.submit(new ThreadUserCompletion(super.getDataFromFile(), map, super.getUserDaoJdbc(), super.getUserDaoMongo()));
         try {
             service.take();
         } catch (InterruptedException e) {
