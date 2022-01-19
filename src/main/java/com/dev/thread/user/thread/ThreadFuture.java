@@ -21,19 +21,27 @@ public class ThreadFuture extends AbstractThread {
 
         super.run();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        List<Future> futures = new ArrayList<>();
-        futures.add(executorService.submit(this::addToMap));
-        futures.add(executorService.submit(this::addToMap));
-        for (Future future : futures) {
+        List<Future> futuresMap = new ArrayList<>();
+        futuresMap.add(executorService.submit(this::addToMap));
+        futuresMap.add(executorService.submit(this::addToMap));
+        for (Future future : futuresMap) {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-        executorService.submit(this::addToMongoDB);
-        executorService.submit(this::addToMySQL);
-        executorService.shutdown();
+
+        List<Future> futuresDB = new ArrayList<>();
+        futuresDB.add(executorService.submit(this::addToMongoDB));
+        futuresDB.add(executorService.submit(this::addToMySQL));
+        for (Future future : futuresDB) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
 
         long finish = System.nanoTime();
         long elapsed = finish - start;

@@ -21,27 +21,43 @@ public class ThreadCompletion extends AbstractThread {
 
         super.run();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        CompletionService<Map<String, User>> completionService = new ExecutorCompletionService<>(executorService);
-        completionService.submit(this::add);
-        completionService.submit(this::add);
+        CompletionService<Map<String, User>> readService = new ExecutorCompletionService<>(executorService);
+        readService.submit(this::add);
+        readService.submit(this::add);
         try {
-            completionService.take();
+            readService.take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        executorService.execute(this::addToMongoDB);
-        executorService.execute(this::addToMySQL);
+
+        CompletionService<Map<String, User>> writeService = new ExecutorCompletionService<>(executorService);
+        writeService.submit(this::addDB1);
+        writeService.submit(this::addDB2);
+        try {
+            writeService.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         executorService.shutdown();
 
         long finish = System.nanoTime();
         long elapsed = finish - start;
         System.out.println("CompletionService.take(): " + elapsed / 1000000);
-
         return getMap();
     }
 
     public Map<String, User> add() {
         this.addToMap();
+        return null;
+    }
+
+    public Map<String, User> addDB1() {
+        this.addToMongoDB();
+        return null;
+    }
+
+    public Map<String, User> addDB2() {
+        this.addToMySQL();
         return null;
     }
 }

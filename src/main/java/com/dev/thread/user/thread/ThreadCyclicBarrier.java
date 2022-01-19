@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 @Service
 public class ThreadCyclicBarrier extends AbstractThread {
     private final CyclicBarrier barrier = new CyclicBarrier(THREADS_NUMBER);
+    private final CyclicBarrier barrierWrite = new CyclicBarrier(THREADS_NUMBER);
 
     public ThreadCyclicBarrier(UserDaoJdbc userDaoJdbc,
                                UserDaoMongo userDaoMongo) {
@@ -25,15 +26,15 @@ public class ThreadCyclicBarrier extends AbstractThread {
         long start = System.nanoTime();
 
         super.run();
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        executorService.execute(this::add);
-        executorService.execute(this::add);
-        executorService.shutdown();
+        ExecutorService read = Executors.newFixedThreadPool(2);
+        read.execute(this::add);
+        read.execute(this::add);
+        read.shutdown();
 
-        ExecutorService writers = Executors.newFixedThreadPool(2);
-        writers.execute(this::addToMySQL);
-        writers.execute(this::addToMongoDB);
-        writers.shutdown();
+        ExecutorService write = Executors.newFixedThreadPool(2);
+        write.execute(this::addDB1);
+        write.execute(this::addDB2);
+        write.shutdown();
 
         long finish = System.nanoTime();
         long elapsed = finish - start;
@@ -43,6 +44,24 @@ public class ThreadCyclicBarrier extends AbstractThread {
 
     public void add() {
         super.addToMap();
+        try {
+            barrierWrite.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addDB1() {
+        super.addToMySQL();
+        try {
+            barrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addDB2() {
+        super.addToMongoDB();
         try {
             barrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {

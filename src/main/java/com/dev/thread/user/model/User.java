@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 
@@ -14,7 +13,6 @@ import java.io.Serializable;
 @Document(collection = User.COLLECTION_NAME)
 @AllArgsConstructor
 @NoArgsConstructor
-@Service
 public class User implements Serializable {
     public static final String COLLECTION_NAME = "users";
 
