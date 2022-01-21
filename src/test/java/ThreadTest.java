@@ -36,12 +36,12 @@ public class ThreadTest {
                 new ThreadFuture(userDaoJdbc, userDaoMongo),
                 new ThreadJoin(userDaoJdbc, userDaoMongo),
                 new ThreadCompletion(userDaoJdbc, userDaoMongo),
-                new ThreaCountDown(userDaoJdbc, userDaoMongo),
+                new ThreadCountDown(userDaoJdbc, userDaoMongo),
                 new ThreadCyclicBarrier(userDaoJdbc, userDaoMongo));
     }
 
     @Test
-    public void version_1_Ok() {
+    public void version_join_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version1 = "join";
@@ -50,7 +50,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_2_Ok() {
+    public void version_countDown_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version3 = "count down";
@@ -59,7 +59,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_3_Ok() {
+    public void version_future_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version4 = "future";
@@ -68,7 +68,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_4_Ok() {
+    public void version_await_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version5 = "await";
@@ -77,7 +77,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_5_Ok() {
+    public void version_completionService_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version6 = "completionService";
@@ -86,7 +86,7 @@ public class ThreadTest {
     }
 
     @Test
-    public void version_6_Ok() {
+    public void version_barrier_Ok() {
         doNothing().when(userDaoJdbc).saveAll(new ArrayList<>());
         doNothing().when(userDaoMongo).saveAll(new ArrayList<>());
         String version7 = "barrier";

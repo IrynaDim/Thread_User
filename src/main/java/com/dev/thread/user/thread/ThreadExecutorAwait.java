@@ -30,7 +30,7 @@ public class ThreadExecutorAwait extends AbstractThread {
         ExecutorService write = Executors.newFixedThreadPool(2);
         write.execute(this::addToMongoDB);
         write.execute(this::addToMySQL);
-        write.shutdown();
+        awaitTerminationAfterShutdown(write);
 
         long finish = System.nanoTime();
         long elapsed = finish - start;

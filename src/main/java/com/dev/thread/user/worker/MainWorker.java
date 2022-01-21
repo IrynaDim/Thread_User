@@ -21,7 +21,7 @@ public class MainWorker {
                       ThreadFuture threadFuture,
                       ThreadJoin threadJoin,
                       ThreadCompletion completion,
-                      ThreaCountDown countDown,
+                      ThreadCountDown countDown,
                       ThreadCyclicBarrier cyclicBarrier) {
         this.userDaoJdbc = userDaoJdbc;
         this.userDaoMongo = userDaoMongo;

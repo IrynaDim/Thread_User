@@ -32,8 +32,14 @@ public class ThreadJoin extends AbstractThread {
 
         Thread tWrite = new Thread(this::addToMongoDB);
         Thread t1Write = new Thread(this::addToMySQL);
-        tWrite.interrupt();
-        t1Write.interrupt();
+        tWrite.start();
+        t1Write.start();
+        try {
+            tWrite.join();
+            t1Write.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         long finish = System.nanoTime();
         long elapsed = finish - start;
