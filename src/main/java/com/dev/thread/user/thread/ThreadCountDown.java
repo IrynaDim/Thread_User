@@ -23,7 +23,7 @@ public class ThreadCountDown extends AbstractThread {
     @Override
     public Map<String, User> run() {
         super.run();
-        ExecutorService executorRead = Executors.newFixedThreadPool(THREADS_NUMBER);
+        ExecutorService executorRead = Executors.newFixedThreadPool(4);
         executorRead.execute(this::addToMap);
         executorRead.execute(this::addToMap);
         try {
@@ -31,17 +31,17 @@ public class ThreadCountDown extends AbstractThread {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        executorRead.shutdown();
+   //     executorRead.shutdown();
 
         ExecutorService executorWrite = Executors.newFixedThreadPool(THREADS_NUMBER);
-        executorWrite.execute(this::addToMySQL);
-        executorWrite.execute(this::addToMySQL);
+        executorRead.execute(this::addToMySQL);
+        executorRead.execute(this::addToMySQL);
         try {
             latchWrite.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        executorWrite.shutdown();
+        executorRead.shutdown();
 
         return getMap();
     }

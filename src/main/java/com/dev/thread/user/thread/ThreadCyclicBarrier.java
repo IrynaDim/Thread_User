@@ -23,15 +23,15 @@ public class ThreadCyclicBarrier extends AbstractThread {
     @Override
     public Map<String, User> run() {
         super.run();
-        ExecutorService read = Executors.newFixedThreadPool(THREADS_NUMBER);
+        ExecutorService read = Executors.newFixedThreadPool(4);
         read.execute(this::addToMap);
         read.execute(this::addToMap);
-        read.shutdown();
+       // read.shutdown();
 
         ExecutorService write = Executors.newFixedThreadPool(THREADS_NUMBER);
-        write.execute(this::addToMySQL);
-        write.execute(this::addToMongoDB);
-        write.shutdown();
+        read.execute(this::addToMySQL);
+        read.execute(this::addToMongoDB);
+        read.shutdown();
         return getMap();
     }
 
