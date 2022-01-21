@@ -26,7 +26,6 @@ public class ThreadCyclicBarrier extends AbstractThread {
         ExecutorService read = Executors.newFixedThreadPool(4);
         read.execute(this::addToMap);
         read.execute(this::addToMap);
-       // read.shutdown();
 
         ExecutorService write = Executors.newFixedThreadPool(THREADS_NUMBER);
         read.execute(this::addToMySQL);

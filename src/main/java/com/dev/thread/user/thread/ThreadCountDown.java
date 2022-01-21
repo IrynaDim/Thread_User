@@ -31,11 +31,9 @@ public class ThreadCountDown extends AbstractThread {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-   //     executorRead.shutdown();
 
-        ExecutorService executorWrite = Executors.newFixedThreadPool(THREADS_NUMBER);
         executorRead.execute(this::addToMySQL);
-        executorRead.execute(this::addToMySQL);
+        executorRead.execute(this::addToMongoDB);
         try {
             latchWrite.await();
         } catch (InterruptedException e) {
