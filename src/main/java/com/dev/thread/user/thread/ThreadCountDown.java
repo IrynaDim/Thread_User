@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 
 @Service
 public class ThreadCountDown extends AbstractThread {
-   private final CountDownLatch countDownLatchWrite = new CountDownLatch(THREADS_NUMBER);
-    private final CountDownLatch countDownLatchRead = new CountDownLatch(THREADS_NUMBER);
+   private final CountDownLatch latchRead = new CountDownLatch(THREADS_NUMBER);
+    private final CountDownLatch latchWrite = new CountDownLatch(THREADS_NUMBER);
 
     public ThreadCountDown(UserDaoJdbc userDaoJdbc,
                            UserDaoMongo userDaoMongo) {
@@ -22,47 +22,46 @@ public class ThreadCountDown extends AbstractThread {
 
     @Override
     public Map<String, User> run() {
-        long start = System.nanoTime();
-
         super.run();
-        ExecutorService read = Executors.newFixedThreadPool(2);
-        read.execute(this::add);
-        read.execute(this::add);
+        ExecutorService executorRead = Executors.newFixedThreadPool(THREADS_NUMBER);
+        executorRead.execute(this::addToMap);
+        executorRead.execute(this::addToMap);
         try {
-            countDownLatchWrite.await();
+            latchRead.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        read.shutdown();
+        executorRead.shutdown();
 
-        ExecutorService write = Executors.newFixedThreadPool(2);
-        write.execute(this::addToDb1);
-        write.execute(this::addToDb2);
+        ExecutorService executorWrite = Executors.newFixedThreadPool(THREADS_NUMBER);
+        executorWrite.execute(this::addToMySQL);
+        executorWrite.execute(this::addToMySQL);
         try {
-            countDownLatchRead.await();
+            latchWrite.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        executorWrite.shutdown();
 
-        long finish = System.nanoTime();
-        long elapsed = finish - start;
-        System.out.println("Count down: " + elapsed / 1000000);
         return getMap();
     }
 
-    public void add() {
+    @Override
+    public void addToMap() {
         super.addToMap();
-        countDownLatchWrite.countDown();
+        latchRead.countDown();
     }
 
-    public void addToDb1() {
+    @Override
+    public void addToMySQL() {
         super.addToMySQL();
-        countDownLatchRead.countDown();
+        latchWrite.countDown();
     }
 
-    public void addToDb2() {
+    @Override
+    public void addToMongoDB() {
         super.addToMongoDB();
-        countDownLatchRead.countDown();
+        latchWrite.countDown();
     }
 }
 

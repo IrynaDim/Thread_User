@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 @Service
 public class ThreadCyclicBarrier extends AbstractThread {
     private final CyclicBarrier barrier = new CyclicBarrier(THREADS_NUMBER);
-    private final CyclicBarrier barrierWrite = new CyclicBarrier(THREADS_NUMBER);
 
     public ThreadCyclicBarrier(UserDaoJdbc userDaoJdbc,
                                UserDaoMongo userDaoMongo) {
@@ -23,35 +22,31 @@ public class ThreadCyclicBarrier extends AbstractThread {
 
     @Override
     public Map<String, User> run() {
-        long start = System.nanoTime();
-
         super.run();
-        ExecutorService read = Executors.newFixedThreadPool(2);
-        read.execute(this::add);
-        read.execute(this::add);
+        ExecutorService read = Executors.newFixedThreadPool(THREADS_NUMBER);
+        read.execute(this::addToMap);
+        read.execute(this::addToMap);
         read.shutdown();
 
-        ExecutorService write = Executors.newFixedThreadPool(2);
-        write.execute(this::addDB1);
-        write.execute(this::addDB2);
+        ExecutorService write = Executors.newFixedThreadPool(THREADS_NUMBER);
+        write.execute(this::addToMySQL);
+        write.execute(this::addToMongoDB);
         write.shutdown();
-
-        long finish = System.nanoTime();
-        long elapsed = finish - start;
-        System.out.println("Barrier: " + elapsed / 1000000);
         return getMap();
     }
 
-    public void add() {
+    @Override
+    public void addToMap() {
         super.addToMap();
         try {
-            barrierWrite.await();
+            barrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
     }
 
-    public void addDB1() {
+    @Override
+    public void addToMySQL() {
         super.addToMySQL();
         try {
             barrier.await();
@@ -60,7 +55,8 @@ public class ThreadCyclicBarrier extends AbstractThread {
         }
     }
 
-    public void addDB2() {
+    @Override
+    public void addToMongoDB() {
         super.addToMongoDB();
         try {
             barrier.await();

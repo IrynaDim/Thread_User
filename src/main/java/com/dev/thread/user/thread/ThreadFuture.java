@@ -17,8 +17,6 @@ public class ThreadFuture extends AbstractThread {
 
     @Override
     public Map<String, User> run() {
-        long start = System.nanoTime();
-
         super.run();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<Future> futuresMap = new ArrayList<>();
@@ -42,10 +40,6 @@ public class ThreadFuture extends AbstractThread {
                 e.printStackTrace();
             }
         }
-
-        long finish = System.nanoTime();
-        long elapsed = finish - start;
-        System.out.println("Future.get(): " + elapsed / 1000000);
         return getMap();
     }
 }

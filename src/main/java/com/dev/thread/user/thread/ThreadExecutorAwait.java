@@ -19,22 +19,16 @@ public class ThreadExecutorAwait extends AbstractThread {
 
     @Override
     public Map<String, User> run() {
-        long start = System.nanoTime();
-
         super.run();
-        ExecutorService read = Executors.newFixedThreadPool(2);
+        ExecutorService read = Executors.newFixedThreadPool(THREADS_NUMBER);
         read.execute(this::addToMap);
         read.execute(this::addToMap);
         awaitTerminationAfterShutdown(read);
 
-        ExecutorService write = Executors.newFixedThreadPool(2);
+        ExecutorService write = Executors.newFixedThreadPool(THREADS_NUMBER);
         write.execute(this::addToMongoDB);
         write.execute(this::addToMySQL);
         awaitTerminationAfterShutdown(write);
-
-        long finish = System.nanoTime();
-        long elapsed = finish - start;
-        System.out.println("Await termination: " + elapsed / 1000000);
         return getMap();
     }
 
