@@ -16,8 +16,6 @@ public class ThreadJoin extends AbstractThread {
 
     @Override
     public Map<String, User> run() {
-        long start = System.nanoTime();
-
         super.run();
         Thread tRead = new Thread(this::addToMap);
         Thread t1Read = new Thread(this::addToMap);
@@ -40,10 +38,6 @@ public class ThreadJoin extends AbstractThread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        long finish = System.nanoTime();
-        long elapsed = finish - start;
-        System.out.println("Join: " + elapsed / 1000000);
         return getMap();
     }
 }
